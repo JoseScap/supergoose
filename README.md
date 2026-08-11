@@ -148,3 +148,7 @@ curl -s http://localhost:3000/projects/<PROJECT_ID>/api-keys
 ## Version
 
 `GET /health` reports the published product version. For this release, it must be `0.0.1`.
+
+## License
+
+SuperGoose is distributed under the custom non-commercial license in [LICENSE](LICENSE). It allows non-commercial use, modification, integration, and redistribution with attribution, but it does not allow resale, paid hosting, subscription access, or any other commercial service built around SuperGoose.

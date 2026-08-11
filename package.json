@@ -2,6 +2,7 @@
   "name": "supergoose",
   "private": true,
   "version": "0.0.1",
+  "license": "SEE LICENSE IN LICENSE",
   "workspaces": [
     "packages/*"
   ],
