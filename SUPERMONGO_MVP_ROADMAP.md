@@ -1,0 +1,301 @@
+# SuperGoose MVP Roadmap
+
+Checklist técnico para construir el MVP de SuperGoose de forma ordenada, verificable y sin implementar de más.
+
+## Estado actual del repo
+
+- [x] Existe una separación inicial entre `supergoose-core` y `supergoose-api`.
+- [x] La API expone `GET /health` llamando al Core.
+- [x] La API expone `GET /ready` basado en el estado real de MongoDB.
+- [x] El Core no depende de Express ni de HTTP.
+- [x] La conexión real a MongoDB ya existe.
+- [x] El CRUD dinámico por collection ya existe.
+- [x] La autenticación por API Key ya existe.
+- [x] La configuración real por entorno ya existe.
+- [x] La validación, el manejo de errores de dominio y la seguridad mínima del MVP ya existen.
+- [x] La documentación de self-hosting y flujo end-to-end ya existe.
+- [x] La batería de tests críticos ya existe.
+
+## Objetivo del MVP
+
+- [x] Levantar SuperGoose.
+- [x] Configurar una MongoDB mediante connection string.
+- [x] Conectar SuperGoose a esa base.
+- [x] Generar o administrar una API Key.
+- [x] Consumir collections permitidas mediante una API REST genérica.
+- [x] Crear, leer, modificar y eliminar documentos.
+- [x] Hacer todo eso sin crear controllers, routes o models por collection.
+
+## Milestone 1. Base de conexión y configuración
+
+- [x] Definir el contrato de configuración por variables de entorno.
+  - Objetivo: centralizar `MONGODB_URI`, `PORT`, `NODE_ENV` y secretos base, dejando la DB de control interna fija por defecto.
+  - Componente: infraestructura.
+  - Dependencias: ninguna.
+  - Criterio de aceptación: la app arranca leyendo configuración desde `.env`, valida valores obligatorios y usa una base de control interna sin requerir nombre de DB en env.
+
+- [x] Implementar carga y validación de configuración en Infra.
+  - Objetivo: evitar valores mágicos y errores silenciosos.
+  - Componente: infraestructura.
+  - Dependencias: contrato de configuración.
+  - Criterio de aceptación: el arranque falla con errores claros si faltan variables requeridas.
+
+- [x] Crear conexión real a MongoDB desde Infra.
+  - Objetivo: encapsular el driver y exponer una puerta de entrada única.
+  - Componente: infraestructura.
+  - Dependencias: configuración.
+  - Criterio de aceptación: la infraestructura puede conectar, desconectar y reportar estado.
+
+- [x] Agregar lifecycle limpio de startup/shutdown.
+  - Objetivo: conectar y cerrar MongoDB sin fugas.
+  - Componente: api + infraestructura.
+  - Dependencias: conexión MongoDB.
+  - Criterio de aceptación: el proceso cierra la conexión al detenerse.
+
+## Milestone 2. Health y readiness
+
+- [x] Implementar `GET /health` conectado al Core.
+  - Objetivo: verificar que API y Core se comunican.
+  - Componente: api.
+  - Dependencias: Core con health.
+  - Criterio de aceptación: el endpoint responde con estado del Core, no hardcodeado.
+
+- [x] Implementar `GET /ready`.
+  - Objetivo: exponer si MongoDB está disponible.
+  - Componente: api + core.
+  - Dependencias: conexión MongoDB y health.
+  - Criterio de aceptación: responde `ready` solo cuando la base está accesible.
+
+- [x] Agregar healthcheck para Docker.
+  - Objetivo: permitir chequeo interno de contenedor.
+  - Componente: infraestructura.
+  - Dependencias: endpoints health/ready.
+  - Criterio de aceptación: Docker puede validar estado de la app.
+
+## Milestone 3. Core de acceso a datos
+
+- [x] Definir errores de dominio del Core.
+  - Objetivo: separar errores de negocio de HTTP.
+  - Componente: core.
+  - Dependencias: ninguna.
+  - Criterio de aceptación: el Core emite errores como `CollectionNotFound`, `InvalidObjectId`, `DocumentNotFound`, `DatabaseDisconnected`.
+
+- [x] Crear acceso genérico a collections.
+  - Objetivo: trabajar por nombre de collection sin controllers por colección.
+  - Componente: core.
+  - Dependencias: conexión MongoDB.
+  - Criterio de aceptación: el Core puede seleccionar collections dinámicamente.
+
+- [x] Implementar lectura por ID.
+  - Objetivo: obtener un documento dado un `ObjectId`.
+  - Componente: core.
+  - Dependencias: acceso a collections y errores de dominio.
+  - Criterio de aceptación: devuelve documento o error de dominio consistente.
+
+- [x] Implementar filtros simples, paginación, limit, skip y sorting.
+  - Objetivo: permitir consultas básicas sobre collections.
+  - Componente: core.
+  - Dependencias: acceso a collections.
+  - Criterio de aceptación: el Core recibe parámetros estructurados y devuelve resultados paginados.
+
+- [x] Implementar create, update, patch y delete genéricos.
+  - Objetivo: cubrir el CRUD base del MVP.
+  - Componente: core.
+  - Dependencias: acceso a collections y errores.
+  - Criterio de aceptación: las operaciones funcionan para cualquier collection permitida.
+
+## Milestone 4. API REST genérica
+
+- [x] Diseñar rutas REST genéricas por collection.
+  - Objetivo: exponer `GET/POST/PUT/PATCH/DELETE /api/:collection`.
+  - Componente: api.
+  - Dependencias: Core CRUD genérico.
+  - Criterio de aceptación: las rutas no están hardcodeadas por modelo.
+
+- [x] Traducir query params HTTP a filtros seguros.
+  - Objetivo: impedir que parámetros crudos se conviertan en queries peligrosas.
+  - Componente: api.
+  - Dependencias: Core de acceso a datos.
+  - Criterio de aceptación: la API solo permite la sintaxis de consulta definida.
+
+- [x] Traducir errores del Core a HTTP.
+  - Objetivo: mapear errores de dominio a status codes.
+  - Componente: api.
+  - Dependencias: errores de dominio.
+  - Criterio de aceptación: cada error relevante devuelve un código y payload consistente.
+
+- [x] Añadir validación de payloads y parámetros.
+  - Objetivo: rechazar entradas inválidas antes de tocar MongoDB.
+  - Componente: api.
+  - Dependencias: rutas y contrato de datos.
+  - Criterio de aceptación: requests inválidas reciben `400` con mensaje claro.
+
+## Milestone 5. API Keys
+
+- [x] Definir modelo de API Key.
+  - Objetivo: representar la key de una base de datos/proyecto, su estado, metadata y timestamps dentro del cluster del cliente.
+  - Componente: core + infraestructura.
+  - Dependencias: ninguna.
+  - Criterio de aceptación: existe una estructura persistible para una key por database/proyecto.
+
+- [x] Implementar generación segura de API Keys.
+  - Objetivo: crear credenciales no predecibles, una por database/proyecto.
+  - Componente: core + infraestructura.
+  - Dependencias: modelo de API Key.
+  - Criterio de aceptación: cada key es única y no se guarda en claro si se define hashing.
+
+- [x] Implementar middleware de autenticación por API Key.
+  - Objetivo: proteger la API con `Authorization: Bearer ...` o header equivalente resolviendo el proyecto/database dentro del cluster del cliente.
+  - Componente: api.
+  - Dependencias: modelo y validación de API Key.
+  - Criterio de aceptación: requests sin key válida reciben `401`.
+
+- [x] Implementar revocación de API Keys.
+  - Objetivo: invalidar accesos comprometidos por database/proyecto.
+  - Componente: core + api.
+  - Dependencias: almacenamiento de keys.
+  - Criterio de aceptación: una key revocada deja de autorizar requests.
+
+## Milestone 6. Seguridad mínima
+
+- [x] Bloquear acceso a collections internas.
+  - Objetivo: evitar exposición de tablas de sistema o metadata propia.
+  - Componente: core + api.
+  - Dependencias: rutas genéricas.
+  - Criterio de aceptación: collections reservadas no son accesibles.
+
+- [x] Limitar tamaño de requests y payloads.
+  - Objetivo: reducir abuso y errores por entradas grandes.
+  - Componente: api.
+  - Dependencias: middleware HTTP.
+  - Criterio de aceptación: payloads excesivos se rechazan antes de llegar al Core.
+
+- [x] Sanitizar inputs críticos.
+  - Objetivo: reducir riesgo de inyección o consultas peligrosas.
+  - Componente: api + core.
+  - Dependencias: rutas genéricas y filtros.
+  - Criterio de aceptación: inputs inválidos o peligrosos se rechazan de forma consistente.
+
+- [x] No exponer secretos ni connection strings en respuestas.
+  - Objetivo: evitar filtraciones accidentales, mostrando la API key solo una vez al crearla o rotarla y devolviendo solo metadata en listados.
+  - Componente: api + core.
+  - Dependencias: manejo de errores.
+  - Criterio de aceptación: ninguna respuesta de listado incluye la API key real; solo la creación o rotación la devuelve una vez.
+
+## Milestone 7. Docker y self-hosting
+
+- [x] Crear Dockerfile para producción.
+  - Objetivo: distribuir SuperGoose como contenedor.
+  - Componente: infraestructura.
+  - Dependencias: build de API y Core.
+  - Criterio de aceptación: la imagen arranca con configuración por entorno.
+
+- [x] Documentar variables de entorno necesarias.
+  - Objetivo: facilitar instalación self-hosted.
+  - Componente: docs.
+  - Dependencias: contrato de configuración.
+  - Criterio de aceptación: un tercero puede arrancar el sistema solo con la guía.
+
+- [x] Definir startup y shutdown limpio en Docker.
+  - Objetivo: detener el contenedor sin dejar conexiones abiertas.
+  - Componente: infraestructura.
+  - Dependencias: lifecycle de MongoDB.
+  - Criterio de aceptación: el contenedor termina de forma ordenada.
+
+## Milestone 8. Testing crítico
+
+- [x] Tests unitarios del Core.
+  - Objetivo: validar lógica independiente de HTTP.
+  - Componente: tests.
+  - Dependencias: Core aislado.
+  - Criterio de aceptación: health, errores y acceso a datos tienen cobertura útil.
+
+- [x] Tests de API.
+  - Objetivo: verificar rutas, status codes y middleware.
+  - Componente: tests.
+  - Dependencias: API funcional.
+  - Criterio de aceptación: las rutas principales responden como se espera.
+
+- [x] Coverage reportes con `c8`.
+  - Objetivo: generar reportes de cobertura para inspeccion manual y seguimiento del MVP.
+  - Componente: tests.
+  - Dependencias: suite de `node:test`.
+  - Criterio de aceptación: `npm run test:coverage` genera reportes `text`, `lcov` y `html`.
+
+- [x] Umbral minimo de coverage.
+  - Objetivo: impedir regresiones de cobertura en CI.
+  - Componente: tests + CI.
+  - Dependencias: reportes de coverage.
+  - Criterio de aceptación: el pipeline falla si la cobertura general cae por debajo del umbral configurado.
+
+- [x] Tests de autenticación por API Key.
+  - Objetivo: validar acceso permitido y denegado.
+  - Componente: tests.
+  - Dependencias: middleware de auth.
+  - Criterio de aceptación: sin key válida no se accede a endpoints protegidos.
+
+- [x] Test de integración API → Core → MongoDB.
+  - Objetivo: comprobar el flujo completo.
+  - Componente: tests.
+  - Dependencias: conexión real o de testing.
+  - Criterio de aceptación: el flujo `POST → GET → PATCH → DELETE` funciona contra MongoDB de prueba.
+
+## Milestone 9. Documentación mínima
+
+- [x] README de arranque rápido.
+  - Objetivo: explicar cómo levantar SuperGoose.
+  - Componente: docs.
+  - Dependencias: configuración y Docker.
+  - Criterio de aceptación: otro desarrollador puede iniciar el proyecto sin ayuda.
+
+- [x] Guía de uso básico de la API.
+  - Objetivo: mostrar create, read, update y delete.
+  - Componente: docs.
+  - Dependencias: rutas REST genéricas.
+  - Criterio de aceptación: se entiende cómo conectar MongoDB y usar la API.
+
+- [x] Documentar API Key y seguridad mínima.
+  - Objetivo: explicar cómo autenticar requests.
+  - Componente: docs.
+  - Dependencias: middleware de auth.
+  - Criterio de aceptación: el usuario sabe cómo obtener y usar la key.
+
+## Fuera de alcance del MVP
+
+- [ ] Dashboard web.
+- [ ] Autenticación de usuarios finales.
+- [ ] Social login.
+- [ ] Storage.
+- [ ] Realtime.
+- [ ] Functions.
+- [ ] Webhooks.
+- [ ] Billing.
+- [ ] Referrals.
+- [ ] SuperGoose Cloud.
+- [ ] MongoDB administrado por nosotros.
+- [ ] SDKs para múltiples lenguajes.
+- [ ] Generación automática de tipos TypeScript.
+- [ ] GraphQL.
+- [ ] Roles avanzados.
+- [ ] Row Level Security.
+- [ ] Sistema avanzado de schemas.
+- [ ] Modelador visual.
+- [ ] Backups.
+- [ ] Analytics.
+- [ ] Kubernetes.
+
+## Orden recomendado de trabajo
+
+1. [ ] Base de conexión y configuración.
+2. [ ] Health y readiness.
+3. [ ] Core de acceso a datos.
+4. [ ] API REST genérica.
+5. [ ] API Keys.
+6. [ ] Seguridad mínima.
+7. [ ] Docker y self-hosting.
+8. [ ] Testing crítico.
+9. [ ] Documentación mínima.
+
+## Criterio final de MVP
+
+- [ ] Un desarrollador puede levantar SuperGoose, conectarlo a su MongoDB, autenticarse mediante una API Key y realizar CRUD dinámico sobre sus collections mediante HTTP sin escribir controllers, models ni endpoints específicos.
