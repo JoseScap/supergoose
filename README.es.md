@@ -17,8 +17,12 @@ El contrato de runtime usa estas variables de entorno:
 - `MONGODB_URI`
 - `PORT` opcional, por defecto `3000`
 - `NODE_ENV` opcional, por defecto `development`
+- `SUPERGOOSE_ROOT_USERNAME` opcional, inicializa el primer usuario root del dashboard
+- `SUPERGOOSE_ROOT_PASSWORD` opcional, inicializa el primer usuario root del dashboard
 
 La base de control interna es fija y no se configura por variable de entorno.
+
+Si se definen `SUPERGOOSE_ROOT_USERNAME` y `SUPERGOOSE_ROOT_PASSWORD`, la API inyecta ese usuario root en `supergoose_control` al iniciar cuando ese username todavía no existe.
 
 ## Arranque local
 
@@ -50,8 +54,12 @@ docker run --rm -p 3000:3000 \
   -e MONGODB_URI="mongodb://host.docker.internal:27017/supergoose" \
   -e PORT=3000 \
   -e NODE_ENV=production \
+  -e SUPERGOOSE_ROOT_USERNAME="root" \
+  -e SUPERGOOSE_ROOT_PASSWORD="change-me" \
   supergoose:0.0.1
 ```
+
+Despues de iniciar la API, abre el dashboard y autenticate con ese usuario y password root cuando el navegador lo solicite.
 
 Si MongoDB corre en tu host sobre Linux, agrega:
 

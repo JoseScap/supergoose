@@ -23,7 +23,7 @@ export interface MongoCollectionLike {
 export interface MongoDatabaseLike {
   collection(name: string): MongoCollectionLike;
   createCollection(name: string): Promise<unknown>;
-  listCollections(filter?: { name?: string }, options?: { nameOnly?: boolean }): { hasNext(): Promise<boolean> };
+  listCollections(filter?: { name?: string }, options?: { nameOnly?: boolean }): { toArray(): Promise<Array<{ name?: string }>> };
 }
 
 export interface MongoClientLike {
@@ -152,8 +152,17 @@ export class MongoConnectionManager {
    */
   async hasCollection(collectionName: string): Promise<boolean> {
     const database = this.getDatabase();
-    const cursor = database.listCollections({ name: collectionName }, { nameOnly: true });
-    return cursor.hasNext();
+    const cursor = await database.listCollections({ name: collectionName }, { nameOnly: true }).toArray();
+    return cursor.length > 0;
+  }
+
+  /**
+   * Lists collection names for a database.
+   */
+  async listCollectionNames(databaseName?: string): Promise<string[]> {
+    const database = this.getDatabase(databaseName);
+    const collections = await database.listCollections({}, { nameOnly: true }).toArray();
+    return collections.flatMap((collection) => (collection.name ? [collection.name] : []));
   }
 
   /**
@@ -177,7 +186,7 @@ export class MongoConnectionManager {
     return {
       async ensureCollection(collectionName: string) {
         const database = getDatabase();
-        const exists = await database.listCollections({ name: collectionName }, { nameOnly: true }).hasNext();
+        const exists = (await database.listCollections({ name: collectionName }, { nameOnly: true }).toArray()).length > 0;
 
         if (!exists) {
           await database.createCollection(collectionName);

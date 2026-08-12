@@ -6,3 +6,5 @@ coverage
 *.tsbuildinfo
 
 warehouse.json
+
+http_client

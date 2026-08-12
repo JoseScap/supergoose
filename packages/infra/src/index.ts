@@ -14,6 +14,10 @@ export {
   createMongoControlPlane,
   DEFAULT_CONTROL_DATABASE_NAME,
   API_KEYS_COLLECTION,
+  DASHBOARD_SESSIONS_COLLECTION,
+  DEFAULT_DASHBOARD_SESSION_TTL_HOURS,
+  MAX_DASHBOARD_SESSION_TTL_HOURS,
+  ROOT_USERS_COLLECTION,
   PROJECTS_COLLECTION,
   PROJECT_CONNECTIONS_COLLECTION,
   MongoControlPlane
@@ -30,6 +34,10 @@ export type {
   ControlPlaneTimestamps,
   CreateApiKeyInput,
   CreateProjectInput,
+  DashboardSessionRecord,
+  DashboardSessionSummary,
+  RootUserRecord,
+  RootUserSummary,
   ProjectConnectionRecord,
   ProjectRecord,
   ResolvedTenantContext

@@ -3,6 +3,9 @@ export interface AppConfig {
   nodeEnv: string;
   mongoDbUri: string;
   controlDatabaseName: string;
+  rootUsername?: string;
+  rootPassword?: string;
+  corsOrigins: string[];
 }
 
 export type AppConfigEnv = Record<string, string | undefined>;
@@ -43,6 +46,23 @@ function readOptionalString(env: AppConfigEnv, key: string, fallback: string): s
 }
 
 /**
+ * Normalizes a CORS origin so values like `localhost:5173` become valid origins.
+ */
+function normalizeCorsOrigin(origin: string): string | null {
+  const trimmed = origin.trim();
+
+  if (!trimmed) {
+    return null;
+  }
+
+  if (/^https?:\/\//i.test(trimmed)) {
+    return trimmed.replace(/\/+$/, '');
+  }
+
+  return `http://${trimmed}`.replace(/\/+$/, '');
+}
+
+/**
  * Reads and validates a numeric port environment variable.
  */
 function readPort(env: AppConfigEnv, key: string, fallback: number): number {
@@ -65,10 +85,18 @@ function readPort(env: AppConfigEnv, key: string, fallback: number): number {
  * Loads the application configuration from environment variables.
  */
 export function loadAppConfig(env: AppConfigEnv): AppConfig {
+  const corsOrigins = readOptionalString(env, 'API_CORS', readOptionalString(env, 'SUPERGOOSE_CORS_ORIGINS', ''))
+    .split(',')
+    .map(normalizeCorsOrigin)
+    .filter((origin): origin is string => Boolean(origin));
+
   return {
     port: readPort(env, 'PORT', 3000),
     nodeEnv: readOptionalString(env, 'NODE_ENV', 'development'),
     mongoDbUri: readRequiredString(env, 'MONGODB_URI'),
-    controlDatabaseName: 'supergoose_control'
+    controlDatabaseName: 'supergoose_control',
+    rootUsername: readOptionalString(env, 'SUPERGOOSE_ROOT_USERNAME', ''),
+    rootPassword: readOptionalString(env, 'SUPERGOOSE_ROOT_PASSWORD', ''),
+    corsOrigins: corsOrigins.length > 0 ? corsOrigins : ['http://localhost:5173']
   };
 }

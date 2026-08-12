@@ -3,9 +3,9 @@ import process from 'node:process';
 import { createSuperGooseCore } from 'supergoose-core';
 import type { AppConfig } from 'supergoose-infra';
 import { createMongoConnectionManager, createMongoControlPlane } from 'supergoose-infra';
-import { createTenantAuthMiddleware } from './auth';
 import { createApp } from './app';
-import { createProjectRouter } from './routes/projects';
+import { createDashboardRouter } from './routes/dashboard';
+import { createTenantAuthMiddleware } from './auth';
 
 /**
  * Starts the HTTP server and wires MongoDB, control plane and tenant auth.
@@ -23,10 +23,14 @@ export async function startServer(
   const controlPlane = createMongoControlPlane(mongo, config.controlDatabaseName);
   await controlPlane.ensureCollections();
 
+  if (config.rootUsername && config.rootPassword) {
+    await controlPlane.bootstrapRootUser(config.rootUsername, config.rootPassword);
+  }
+
   core.setDocumentStore(mongo.createDocumentStore(config.controlDatabaseName));
 
   const authMiddleware = createTenantAuthMiddleware(controlPlane);
-  const publicRouter = createProjectRouter(controlPlane);
+  const dashboardRouter = createDashboardRouter(controlPlane, mongo, core);
 
   const app = createApp(
     {
@@ -34,8 +38,10 @@ export async function startServer(
     },
     mongo,
     core,
+    config.corsOrigins,
     authMiddleware,
-    publicRouter
+    undefined,
+    dashboardRouter
   );
   const server = app.listen(config.port, () => {
     console.log(`SuperGoose API listening on port ${config.port}`);
