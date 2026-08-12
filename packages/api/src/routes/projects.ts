@@ -15,6 +15,12 @@ interface RotateApiKeyBody {
 
 interface CreateProjectResponse {
   project: unknown;
+  apiKey: {
+    id: string;
+    key: string;
+    keyPrefix: string;
+    scopes: string[];
+  };
 }
 
 interface ApiKeyMetadataResponse {
@@ -160,8 +166,21 @@ export async function handleCreateProject(
       databaseName: normalizeDatabaseName(slug, body.databaseName)
     });
 
+    const scopes = parseOptionalScopes(body.scopes) ?? ['documents:*'];
+    const apiKeyResult = await controlPlane.createApiKey({
+      projectId: project._id,
+      databaseName: project.databaseName,
+      scopes
+    });
+
     const response: CreateProjectResponse = {
-      project
+      project,
+      apiKey: {
+        id: apiKeyResult.record._id,
+        key: apiKeyResult.key,
+        keyPrefix: apiKeyResult.record.keyPrefix,
+        scopes: apiKeyResult.record.scopes
+      }
     };
 
     res.status(201).json(response);
