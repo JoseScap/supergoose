@@ -17,6 +17,7 @@ El contrato de runtime usa estas variables de entorno:
 - `MONGODB_URI`
 - `PORT` opcional, por defecto `3000`
 - `NODE_ENV` opcional, por defecto `development`
+- `API_CORS` opcional, lista separada por comas de origins permitidos del dashboard
 - `SUPERGOOSE_ROOT_USERNAME` opcional, inicializa el primer usuario root del dashboard
 - `SUPERGOOSE_ROOT_PASSWORD` opcional, inicializa el primer usuario root del dashboard
 
@@ -41,25 +42,29 @@ npm run dev
 
 ## Docker
 
+La imagen de Docker empaqueta solo la API. El frontend del dashboard se construye y se ejecuta por separado.
+
 Construir la imagen de produccion:
 
 ```bash
-docker build -t supergoose:0.0.1 .
+docker build -t supergoose:0.0.2 .
 ```
 
 Ejecutar el contenedor con envs manuales:
 
 ```bash
 docker run --rm -p 3000:3000 \
+  --env-file .env.example \
   -e MONGODB_URI="mongodb://host.docker.internal:27017/supergoose" \
   -e PORT=3000 \
   -e NODE_ENV=production \
+  -e API_CORS="http://localhost:5173" \
   -e SUPERGOOSE_ROOT_USERNAME="root" \
   -e SUPERGOOSE_ROOT_PASSWORD="change-me" \
-  supergoose:0.0.1
+  supergoose:0.0.2
 ```
 
-Despues de iniciar la API, abre el dashboard y autenticate con ese usuario y password root cuando el navegador lo solicite.
+Despues de iniciar la API, abre el frontend del dashboard por separado y autenticate con ese usuario y password root cuando el navegador lo solicite.
 
 Si MongoDB corre en tu host sobre Linux, agrega:
 
