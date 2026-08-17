@@ -60,11 +60,11 @@ export function LoginForm({ className, ...props }: ComponentProps<"div">) {
       <Card className="border-border/70 bg-background/85 shadow-[0_20px_60px_rgba(15,23,42,0.12)] backdrop-blur">
         <CardHeader className="space-y-3">
           <div className="inline-flex w-fit items-center rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-xs font-medium text-primary">
-            Root access
+            Secure access
           </div>
-          <CardTitle className="text-3xl tracking-tight">Sign in to SuperGoose</CardTitle>
+          <CardTitle className="text-3xl tracking-tight">Sign in</CardTitle>
           <CardDescription className="text-base leading-6">
-            Use your root username and password to manage projects, databases, and API keys.
+            Use your SuperGoose credentials to continue.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -77,10 +77,10 @@ export function LoginForm({ className, ...props }: ComponentProps<"div">) {
                   name="username"
                   type="text"
                   autoComplete="username"
-                  placeholder="root"
+                  placeholder="Your username"
                   required
                 />
-                <FieldDescription>Use the root username, not an email address.</FieldDescription>
+                <FieldDescription>Use the account you were given for SuperGoose.</FieldDescription>
               </Field>
               <Field>
                 <FieldLabel htmlFor="password">Password</FieldLabel>
@@ -89,10 +89,10 @@ export function LoginForm({ className, ...props }: ComponentProps<"div">) {
                   name="password"
                   type="password"
                   autoComplete="current-password"
-                  placeholder="••••••••"
+                  placeholder="Your password"
                   required
                 />
-                <FieldDescription>Session cookies are created by the API after a successful sign in.</FieldDescription>
+                <FieldDescription>We&apos;ll keep you signed in on this device after a successful login.</FieldDescription>
               </Field>
               {error ? (
                 <p

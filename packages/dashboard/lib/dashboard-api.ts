@@ -28,12 +28,11 @@ async function readErrorMessage(response: Response): Promise<string> {
 }
 
 export async function loginRootUser(input: { username: string; password: string }): Promise<RootUser> {
-  const response = await fetch(`${getApiBaseUrl()}/dashboard/auth`, {
+  const response = await fetch("/api/dashboard/auth", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
-    credentials: "include",
     body: JSON.stringify(input),
   })
 
