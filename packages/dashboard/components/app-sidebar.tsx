@@ -2,11 +2,12 @@
 
 import * as React from "react"
 
-import { NavDocuments } from "@/components/nav-documents"
-import { NavMain } from "@/components/nav-main"
 import { NavSecondary } from "@/components/nav-secondary"
 import { NavUser } from "@/components/nav-user"
 import {
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarGroupLabel,
   Sidebar,
   SidebarContent,
   SidebarFooter,
@@ -15,7 +16,16 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
-import { LayoutDashboardIcon, ListIcon, ChartBarIcon, FolderIcon, UsersIcon, CameraIcon, FileTextIcon, Settings2Icon, CircleHelpIcon, SearchIcon, DatabaseIcon, FileChartColumnIcon, FileIcon, CommandIcon } from "lucide-react"
+import Link from "next/link"
+import {
+  LayoutDashboardIcon,
+  FolderIcon,
+  KeyRoundIcon,
+  Settings2Icon,
+  CircleHelpIcon,
+  SearchIcon,
+  CommandIcon,
+} from "lucide-react"
 
 const data = {
   user: {
@@ -23,105 +33,6 @@ const data = {
     email: "m@example.com",
     avatar: "/avatars/shadcn.jpg",
   },
-  navMain: [
-    {
-      title: "Dashboard",
-      url: "#",
-      icon: (
-        <LayoutDashboardIcon
-        />
-      ),
-    },
-    {
-      title: "Lifecycle",
-      url: "#",
-      icon: (
-        <ListIcon
-        />
-      ),
-    },
-    {
-      title: "Analytics",
-      url: "#",
-      icon: (
-        <ChartBarIcon
-        />
-      ),
-    },
-    {
-      title: "Projects",
-      url: "#",
-      icon: (
-        <FolderIcon
-        />
-      ),
-    },
-    {
-      title: "Team",
-      url: "#",
-      icon: (
-        <UsersIcon
-        />
-      ),
-    },
-  ],
-  navClouds: [
-    {
-      title: "Capture",
-      icon: (
-        <CameraIcon
-        />
-      ),
-      isActive: true,
-      url: "#",
-      items: [
-        {
-          title: "Active Proposals",
-          url: "#",
-        },
-        {
-          title: "Archived",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Proposal",
-      icon: (
-        <FileTextIcon
-        />
-      ),
-      url: "#",
-      items: [
-        {
-          title: "Active Proposals",
-          url: "#",
-        },
-        {
-          title: "Archived",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Prompts",
-      icon: (
-        <FileTextIcon
-        />
-      ),
-      url: "#",
-      items: [
-        {
-          title: "Active Proposals",
-          url: "#",
-        },
-        {
-          title: "Archived",
-          url: "#",
-        },
-      ],
-    },
-  ],
   navSecondary: [
     {
       title: "Settings",
@@ -148,30 +59,28 @@ const data = {
       ),
     },
   ],
-  documents: [
+  clusterItems: [
     {
-      name: "Data Library",
-      url: "#",
-      icon: (
-        <DatabaseIcon
-        />
-      ),
+      title: "Dashboard",
+      url: "/dashboard",
+      icon: <LayoutDashboardIcon />,
     },
     {
-      name: "Reports",
-      url: "#",
-      icon: (
-        <FileChartColumnIcon
-        />
-      ),
+      title: "Projects",
+      url: "/dashboard/projects",
+      icon: <FolderIcon />,
+    },
+  ],
+  projectItems: [
+    {
+      title: "Dashboard",
+      url: "/dashboard",
+      icon: <LayoutDashboardIcon />,
     },
     {
-      name: "Word Assistant",
-      url: "#",
-      icon: (
-        <FileIcon
-        />
-      ),
+      title: "Api keys",
+      url: "/dashboard/projects/api-keys",
+      icon: <KeyRoundIcon />,
     },
   ],
 }
@@ -186,14 +95,47 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               render={<a href="#" />}
             >
               <CommandIcon className="size-5!" />
-              <span className="text-base font-semibold">Acme Inc.</span>
+              <span className="text-base font-semibold">219 LessAPI</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={data.navMain} />
-        <NavDocuments items={data.documents} />
+        <SidebarGroup>
+          <SidebarGroupLabel>Cluster</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {data.clusterItems.map((item) => (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton render={<Link href={item.url} />}>
+                    {item.icon}
+                    <span>{item.title}</span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+        <SidebarGroup className="pt-0">
+          <SidebarGroupLabel>
+            <span className="flex w-full items-center gap-3">
+              <span>Project</span>
+              <span className="h-px flex-1 bg-sidebar-border" />
+            </span>
+          </SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {data.projectItems.map((item) => (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton render={<Link href={item.url} />}>
+                    {item.icon}
+                    <span>{item.title}</span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
         <NavSecondary items={data.navSecondary} className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>

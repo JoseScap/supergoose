@@ -8,6 +8,22 @@ export interface DashboardAuthResponse {
   rootUser: RootUser
 }
 
+export interface DashboardProjectSummary {
+  id: string
+  name: string
+  slug: string
+  status: "active" | "inactive"
+  databaseName: string
+  createdAt: string
+  updatedAt: string
+  apiKeyCount: number
+  activeApiKeyPrefix?: string
+}
+
+export interface DashboardProjectsResponse {
+  projects: DashboardProjectSummary[]
+}
+
 const DEFAULT_API_BASE_URL = "http://127.0.0.1:4000"
 
 function normalizeBaseUrl(value: string): string {
@@ -69,5 +85,28 @@ export async function getRootUserFromSession(cookieHeader?: string): Promise<Roo
     return payload.rootUser ?? null
   } catch {
     return null
+  }
+}
+
+export async function getDashboardProjects(cookieHeader?: string): Promise<DashboardProjectSummary[]> {
+  try {
+    const response = await fetch(`${getApiBaseUrl()}/dashboard/projects`, {
+      method: "GET",
+      headers: cookieHeader ? { cookie: cookieHeader } : undefined,
+      cache: "no-store",
+    })
+
+    if (response.status === 401) {
+      return []
+    }
+
+    if (!response.ok) {
+      return []
+    }
+
+    const payload = (await response.json()) as Partial<DashboardProjectsResponse>
+    return payload.projects ?? []
+  } catch {
+    return []
   }
 }

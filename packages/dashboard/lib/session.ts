@@ -9,7 +9,11 @@ function serializeCookieHeader(cookieStore: Awaited<ReturnType<typeof cookies>>)
   return parts.length > 0 ? parts.join("; ") : undefined
 }
 
-export async function getDashboardRootUser(): Promise<RootUser | null> {
+export async function getDashboardCookieHeader(): Promise<string | undefined> {
   const cookieStore = await cookies()
-  return getRootUserFromSession(serializeCookieHeader(cookieStore))
+  return serializeCookieHeader(cookieStore)
+}
+
+export async function getDashboardRootUser(): Promise<RootUser | null> {
+  return getRootUserFromSession(await getDashboardCookieHeader())
 }
