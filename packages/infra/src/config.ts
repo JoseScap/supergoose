@@ -91,12 +91,12 @@ export function loadAppConfig(env: AppConfigEnv): AppConfig {
     .filter((origin): origin is string => Boolean(origin));
 
   return {
-    port: readPort(env, 'PORT', 3000),
+    port: readPort(env, 'PORT', 4000),
     nodeEnv: readOptionalString(env, 'NODE_ENV', 'development'),
     mongoDbUri: readRequiredString(env, 'MONGODB_URI'),
     controlDatabaseName: 'supergoose_control',
     rootUsername: readOptionalString(env, 'SUPERGOOSE_ROOT_USERNAME', ''),
     rootPassword: readOptionalString(env, 'SUPERGOOSE_ROOT_PASSWORD', ''),
-    corsOrigins: corsOrigins.length > 0 ? corsOrigins : ['http://localhost:5173']
+    corsOrigins: corsOrigins.length > 0 ? corsOrigins : ['http://127.0.0.1:3000', 'http://localhost:3000']
   };
 }

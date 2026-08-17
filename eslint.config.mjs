@@ -8,7 +8,7 @@ export default [
   },
   js.configs.recommended,
   {
-    files: ['**/*.ts'],
+    files: ['**/*.{ts,tsx}'],
     languageOptions: {
       parser: tsParser,
       ecmaVersion: 'latest',
@@ -19,7 +19,16 @@ export default [
     },
     rules: {
       ...tsPlugin.configs.recommended.rules,
-      '@typescript-eslint/consistent-type-imports': 'error'
+      '@typescript-eslint/consistent-type-imports': 'error',
+      'no-undef': 'off',
+      'no-restricted-syntax': [
+        'error',
+        {
+          selector: "ImportDeclaration[source.value='react'][importKind='type'] > ImportNamespaceSpecifier",
+          message:
+            "Do not use `import type * as React from 'react'` in TSX files. Use a normal React import or type-specific imports instead."
+        }
+      ]
     }
   }
 ];

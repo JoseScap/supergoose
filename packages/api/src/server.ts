@@ -43,7 +43,10 @@ export async function startServer(
     undefined,
     dashboardRouter
   );
-  const server = app.listen(config.port, () => {
+  const host = process.env.HOST?.trim();
+  const server = host ? app.listen(config.port, host, () => {
+    console.log(`SuperGoose API listening on ${host}:${config.port}`);
+  }) : app.listen(config.port, () => {
     console.log(`SuperGoose API listening on port ${config.port}`);
   });
 

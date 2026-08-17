@@ -8,7 +8,7 @@
   ],
   "scripts": {
     "build": "tsc -b tsconfig.json",
-    "dev": "tsx watch src/index.ts",
+    "dev": "npm run build && HOST=127.0.0.1 concurrently -k -n tsc,server -c yellow,blue \"tsc -b -w tsconfig.json\" \"node --watch dist/index.js\"",
     "start": "node dist/index.js"
   },
   "dependencies": {
